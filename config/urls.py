@@ -9,8 +9,8 @@ from django.urls import include, path
 from django.views.generic.base import RedirectView
 
 urlpatterns = [
-    # La entrada principal dirige al registro disponible en esta etapa.
-    path('', RedirectView.as_view(pattern_name='cuentas:registro', permanent=False)),
+    # El inicio de cuenta conduce al acceso cuando no existe una sesión autenticada.
+    path('', RedirectView.as_view(pattern_name='cuentas:inicio', permanent=False)),
     path('cuentas/', include('cuentas_app.urls')),
     path('admin/', admin.site.urls),
 ]

@@ -1,0 +1,38 @@
+{% extends "cuentas_app/base.html" %}
+
+{% block titulo %}Iniciar sesión{% endblock %}
+
+{% block contenido %}
+<section class="card border-0 shadow-sm" aria-labelledby="titulo-acceso">
+    <div class="card-body p-4 p-md-5">
+        <h1 class="h3 mb-2" id="titulo-acceso">Inicia sesión</h1>
+        {% if user.is_authenticated %}
+            <p class="text-body-secondary">Ya tienes una sesión iniciada.</p>
+            <a class="btn btn-primary w-100" href="{% url 'cuentas:inicio' %}">Ir a mi cuenta</a>
+        {% else %}
+            <p class="text-body-secondary mb-4">Ingresa con tu correo electrónico y contraseña.</p>
+            <form method="post" action="{% url 'cuentas:iniciar_sesion' %}" novalidate>
+                {% csrf_token %}
+                {# LoginView valida el destino; no se utiliza un next sin comprobar. #}
+                {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+                {% if form.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {% if form.non_field_errors %}
+                            {{ form.non_field_errors }}
+                        {% else %}
+                            Revisa los campos indicados para iniciar sesión.
+                        {% endif %}
+                    </div>
+                {% endif %}
+                {% include "cuentas_app/campos_formulario.html" with formulario=form only %}
+                <button class="btn btn-primary w-100 mt-2" type="submit">Iniciar sesión</button>
+            </form>
+            <p class="text-center small mt-4 mb-0">
+                ¿Aún no tienes una cuenta?
+                <a href="{% url 'cuentas:registro' %}">Regístrate</a>.
+            </p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

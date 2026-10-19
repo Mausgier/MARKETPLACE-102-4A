@@ -14,9 +14,26 @@
 </head>
 <body class="bg-body-tertiary">
     <header class="border-bottom bg-white">
-        <div class="container py-3">
+        <div class="container py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
             <a class="fs-5 fw-semibold text-decoration-none text-dark"
-               href="{% url 'cuentas:registro' %}">Mercado en línea</a>
+               href="{% url 'cuentas:inicio' %}">Mercado en línea</a>
+            <nav class="d-flex flex-wrap align-items-center gap-2" aria-label="Navegación principal">
+                {% if user.is_authenticated %}
+                    <a class="btn btn-outline-primary btn-sm" href="{% url 'cuentas:inicio' %}">Mi cuenta</a>
+                    {% if user.is_staff %}
+                        <a class="btn btn-outline-secondary btn-sm" href="{% url 'admin:index' %}">Administración</a>
+                    {% endif %}
+                    {# LogoutView admite POST; el enlace GET no debe cerrar sesiones. #}
+                    {# https://docs.djangoproject.com/en/5.2/topics/auth/default/#django.contrib.auth.views.LogoutView #}
+                    <form method="post" action="{% url 'cuentas:cerrar_sesion' %}">
+                        {% csrf_token %}
+                        <button class="btn btn-outline-secondary btn-sm" type="submit">Cerrar sesión</button>
+                    </form>
+                {% else %}
+                    <a class="btn btn-outline-primary btn-sm" href="{% url 'cuentas:iniciar_sesion' %}">Iniciar sesión</a>
+                    <a class="btn btn-primary btn-sm" href="{% url 'cuentas:registro' %}">Crear cuenta</a>
+                {% endif %}
+            </nav>
         </div>
     </header>
     <main class="container py-4 py-md-5" id="contenido-principal">

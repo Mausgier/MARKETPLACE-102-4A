@@ -178,3 +178,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # En este caso, establecemos nuestro modelo personalizado, siguiendo la documentacion de 'Django'.
 # https://docs.djangoproject.com/en/5.2/topics/auth/customizing/#auth-custom-user
 AUTH_USER_MODEL = "cuentas_app.Usuario"
+
+
+# Rutas de acceso y destinos predeterminados; las vistas nativas validan next.
+# https://docs.djangoproject.com/en/5.2/ref/settings/#login-url
+LOGIN_URL = "cuentas:iniciar_sesion"
+LOGIN_REDIRECT_URL = "cuentas:inicio"
+LOGOUT_REDIRECT_URL = "cuentas:iniciar_sesion"
+
+# Mantiene explícitas las protecciones de la cookie de sesión en desarrollo local.
+# https://docs.djangoproject.com/en/5.2/ref/settings/#session-cookie-httponly
+# https://docs.djangoproject.com/en/5.2/ref/settings/#session-cookie-samesite
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"

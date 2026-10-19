@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
 from .models import Usuario
 
@@ -90,3 +90,42 @@ class RegistroUsuarioForm(UserCreationForm):
             )
 
         return email
+
+
+class InicioSesionForm(AuthenticationForm):
+    """
+    Valida el acceso por correo utilizando la autenticación nativa de Django.
+
+    https://docs.djangoproject.com/en/5.2/topics/auth/default/#django.contrib.auth.forms.AuthenticationForm
+    """
+
+    # AuthenticationForm conserva el nombre interno username; el modelo utiliza email.
+    username = forms.EmailField(
+        label="Correo electrónico",
+        max_length=254,
+        widget=forms.EmailInput(attrs={
+            "class": "form-control",
+            "autocomplete": "username",
+            "autofocus": True,
+        }),
+    )
+
+    # No distingue entre cuenta inexistente, contraseña incorrecta o suspensión.
+    MENSAJE_ACCESO_INVALIDO = (
+        "No fue posible iniciar sesión. Revisa el correo y la contraseña. "
+        "Si tu cuenta está inactiva o suspendida, consulta al administrador."
+    )
+    error_messages = {
+        "invalid_login": MENSAJE_ACCESO_INVALIDO,
+        "inactive": MENSAJE_ACCESO_INVALIDO,
+    }
+
+    def __init__(self, request=None, *args, **kwargs):
+        """Adapta la presentación sin reemplazar la validación de credenciales."""
+        super().__init__(request, *args, **kwargs)
+        self.fields["password"].label = "Contraseña"
+        self.fields["password"].widget.attrs["class"] = "form-control"
+
+    def clean_username(self):
+        """Aplica al correo la misma normalización utilizada durante el registro."""
+        return self.cleaned_data["username"].strip().lower()

@@ -1,0 +1,21 @@
+{# Comparte etiquetas, ayudas y errores entre registro e inicio de sesión. #}
+{% for campo in formulario %}
+    <div class="mb-3">
+        <label class="form-label" for="{{ campo.id_for_label }}">
+            {{ campo.label }}
+        </label>
+        {{ campo }}
+        {% if campo.help_text %}
+            <div class="form-text" id="{{ campo.auto_id }}_helptext">
+                {{ campo.help_text }}
+            </div>
+        {% endif %}
+        {% if campo.errors %}
+            <ul class="text-danger small mt-2 mb-0" id="{{ campo.auto_id }}_error">
+                {% for error in campo.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+{% endfor %}

@@ -23,30 +23,14 @@
                 </div>
             {% endif %}
 
-            {% for campo in formulario %}
-                <div class="mb-3">
-                    <label class="form-label" for="{{ campo.id_for_label }}">
-                        {{ campo.label }}
-                    </label>
-                    {{ campo }}
-                    {% if campo.help_text %}
-                        <div class="form-text" id="{{ campo.auto_id }}_helptext">
-                            {{ campo.help_text }}
-                        </div>
-                    {% endif %}
-                    {% if campo.errors %}
-                        <ul class="text-danger small mt-2 mb-0"
-                            id="{{ campo.auto_id }}_error">
-                            {% for error in campo.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </div>
-            {% endfor %}
+            {% include "cuentas_app/campos_formulario.html" with formulario=formulario only %}
 
             <button class="btn btn-primary w-100 mt-2" type="submit">Crear cuenta</button>
         </form>
+        <p class="text-center small mt-4 mb-0">
+            ¿Ya tienes una cuenta?
+            <a href="{% url 'cuentas:iniciar_sesion' %}">Inicia sesión</a>.
+        </p>
     </div>
 </section>
 {% endblock %}

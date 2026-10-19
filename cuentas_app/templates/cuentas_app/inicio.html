@@ -1,0 +1,17 @@
+{% extends "cuentas_app/base.html" %}
+
+{% block titulo %}Mi cuenta{% endblock %}
+
+{% block contenido %}
+<section class="card border-0 shadow-sm" aria-labelledby="titulo-cuenta">
+    <div class="card-body p-4 p-md-5">
+        <p class="text-success fw-semibold mb-2">Sesión iniciada</p>
+        <h1 class="h3 mb-3" id="titulo-cuenta">Bienvenido, {{ user.first_name|default:"usuario" }}</h1>
+        <p>Tu sesión está activa.</p>
+        <p class="text-body-secondary mb-0">
+            Tu preferencia inicial es {{ user.get_rol_display|lower }}.
+            Esta preferencia no limita las actividades de compra y venta de tu cuenta.
+        </p>
+    </div>
+</section>
+{% endblock %}
