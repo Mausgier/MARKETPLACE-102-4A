@@ -1,0 +1,8 @@
+# Entorno verificado con Python 3.14 y Django 5.2 LTS.
+Django==5.2.18
+python-dotenv==1.2.4
+
+# Dependencias de Django fijadas para reproducir el entorno de desarrollo.
+asgiref==3.12.1
+sqlparse==0.6.0
+tzdata==2026.5

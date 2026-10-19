@@ -1,0 +1,46 @@
+# Entornos virtuales y archivos generados por Python.
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+
+# Bases SQLite locales y sus archivos auxiliares; conservar las migraciones.
+*.sqlite3
+*.sqlite3-*
+*.sqlite
+*.sqlite-*
+
+# Configuración privada; la plantilla sin secretos sí debe versionarse.
+.env
+.env.*
+!.env.example
+.secrets/
+secrets/
+credentials/
+.aws/
+credentials*.json
+service-account*.json
+client_secret*.json
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Archivos temporales, registros y copias locales.
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+backups/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.DS_Store
+Thumbs.db
+Desktop.ini

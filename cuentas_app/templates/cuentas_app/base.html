@@ -1,0 +1,31 @@
+{% load static %}
+<!doctype html>
+<html lang="es-CL">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block titulo %}Crear cuenta{% endblock %} | Mercado en línea</title>
+    {# Bootstrap fija versión e integridad del recurso obtenido desde el CDN. #}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+          crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'cuentas_app/css/registro.css' %}">
+</head>
+<body class="bg-body-tertiary">
+    <header class="border-bottom bg-white">
+        <div class="container py-3">
+            <a class="fs-5 fw-semibold text-decoration-none text-dark"
+               href="{% url 'cuentas:registro' %}">Mercado en línea</a>
+        </div>
+    </header>
+    <main class="container py-4 py-md-5" id="contenido-principal">
+        <div class="registro-contenedor mx-auto">
+            {% for mensaje in messages %}
+                <div class="alert alert-success" role="status">{{ mensaje }}</div>
+            {% endfor %}
+            {% block contenido %}{% endblock %}
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,16 @@
+/* Limita el ancho del registro sin impedir su adaptación a pantallas pequeñas. */
+.registro-contenedor {
+    max-width: 38rem;
+    /* Permite leer direcciones extensas sin desbordar el formulario. */
+    overflow-wrap: anywhere;
+}
+
+/* Identifica los errores que Django marca mediante atributos de accesibilidad. */
+.registro-contenedor [aria-invalid="true"] {
+    border-color: #b02a37;
+}
+
+.registro-contenedor .form-text ul {
+    margin-bottom: 0;
+    padding-left: 1.25rem;
+}
