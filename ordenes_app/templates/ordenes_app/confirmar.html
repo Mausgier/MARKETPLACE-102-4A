@@ -1,0 +1,19 @@
+{% extends "cuentas_app/base.html" %}
+{% block titulo %}Confirmar orden{% endblock %}
+{% block contenido %}
+<h1 class="h3">Resumen antes de generar la orden</h1>
+{% for item in items %}
+    <article class="card mb-3"><div class="card-body">
+        <h2 class="h5">{{ item.publicacion.producto.nombre }}</h2>
+        <p>Unidades: {{ item.cantidad }} · Precio unitario: {{ item.publicacion.precio }}</p>
+        <p>Subtotal: {{ item.subtotal }}</p>
+    </div></article>
+{% endfor %}
+<p class="fw-semibold">Total: {{ total }}</p>
+<p>Al confirmar se vaciará el carrito y se reservarán todas las unidades durante quince minutos desde la generación. La orden quedará pendiente de pago. No se realizará ningún cobro.</p>
+<form method="post" action="{% url 'ordenes:confirmar' %}">
+    {% csrf_token %}{{ formulario }}
+    <button type="submit" class="btn btn-primary">Confirmar y generar orden</button>
+</form>
+<a class="d-inline-block mt-3" href="{% url 'carrito:ver' %}">Volver al carrito</a>
+{% endblock %}

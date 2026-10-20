@@ -1,0 +1,15 @@
+{% extends "cuentas_app/base.html" %}
+{% block titulo %}Mis órdenes{% endblock %}
+{% block contenido %}
+<h1 class="h3">Mis órdenes</h1>
+{% for orden in ordenes %}
+    <article class="card mb-3"><div class="card-body">
+        <h2 class="h6">Orden {{ orden.pk }}</h2>
+        <p>{{ orden.get_estado_display }} · Total: {{ orden.total }}</p>
+        <p>Vencimiento: {{ orden.vence_en|date:"d/m/Y H:i:s T" }}</p>
+        {% if not orden.reserva_vigente %}<p>Esta reserva no está vigente y no puede utilizarse para pagar.</p>{% endif %}
+        <a href="{% url 'ordenes:detalle' orden.pk %}">Ver detalle</a>
+    </div></article>
+{% empty %}<p>Aún no tienes órdenes de compra.</p>{% endfor %}
+<a href="{% url 'productos:recientes' %}">Volver al catálogo</a>
+{% endblock %}

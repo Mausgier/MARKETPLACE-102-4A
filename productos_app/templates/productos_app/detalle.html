@@ -10,7 +10,7 @@
         <div class="mb-4">{{ publicacion.producto.descripcion|linebreaksbr }}</div>
         <dl class="row">
             <dt class="col-sm-5">Precio</dt><dd class="col-sm-7">{{ publicacion.precio }}</dd>
-            <dt class="col-sm-5">Unidades disponibles</dt><dd class="col-sm-7">{{ publicacion.stock_disponible }}</dd>
+            <dt class="col-sm-5">Unidades disponibles</dt><dd class="col-sm-7">{{ publicacion.unidades_libres }}</dd>
             <dt class="col-sm-5">Publicado por</dt><dd class="col-sm-7">{{ publicacion.vendedor.first_name|default:"Vendedor" }}</dd>
             <dt class="col-sm-5">Estado</dt><dd class="col-sm-7">{{ publicacion.get_estado_display }}</dd>
         </dl>

@@ -66,7 +66,7 @@
             <p class="small text-body-secondary mb-1">{{ publicacion.producto.categoria }}</p>
             <h2 class="h5">{{ publicacion.producto.nombre }}</h2>
             <p class="fw-semibold mb-1">Precio: {{ publicacion.precio }}</p>
-            <p class="small">Unidades disponibles: {{ publicacion.stock_disponible }}</p>
+            <p class="small">Unidades disponibles: {{ publicacion.unidades_libres }}</p>
             <a class="btn btn-outline-primary btn-sm" href="{% url 'productos:detalle' publicacion.pk %}">
                 Ver detalle<span class="visually-hidden"> de {{ publicacion.producto.nombre }}</span>
             </a>

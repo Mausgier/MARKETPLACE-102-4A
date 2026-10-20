@@ -63,11 +63,11 @@ class ItemCarrito(models.Model):
         """Evalúa la oferta actual sin cambiar la selección ni reservar existencias."""
         if self.publicacion.estado != Publicacion.Estado.ACTIVA:
             return "Publicación retirada. Elimina esta línea del carrito."
-        if self.publicacion.stock_disponible == 0:
+        if self.publicacion.unidades_libres == 0:
             return "Artículo sin existencias. Elimina la línea o espera su reposición."
-        if self.cantidad > self.publicacion.stock_disponible:
+        if self.cantidad > self.publicacion.unidades_libres:
             return (
-                f"Solo hay {self.publicacion.stock_disponible} unidades disponibles. "
+                f"Solo hay {self.publicacion.unidades_libres} unidades disponibles. "
                 "Reduce la cantidad o elimina la línea."
             )
         return ""

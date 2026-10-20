@@ -14,11 +14,14 @@
             <p>{{ publicacion.producto.descripcion|linebreaksbr }}</p>
             <dl class="row mb-2">
                 <dt class="col-sm-6">Precio</dt><dd class="col-sm-6">{{ publicacion.precio }}</dd>
-                <dt class="col-sm-6">Unidades disponibles</dt><dd class="col-sm-6">{{ publicacion.stock_disponible }}</dd>
+                <dt class="col-sm-6">Unidades físicas</dt><dd class="col-sm-6">{{ publicacion.stock_disponible }}</dd>
+                <dt class="col-sm-6">Unidades reservadas</dt><dd class="col-sm-6">{{ publicacion.stock_reservado }}</dd>
+                <dt class="col-sm-6">Unidades libres</dt><dd class="col-sm-6">{{ publicacion.unidades_libres }}</dd>
                 <dt class="col-sm-6">Estado</dt>
                 <dd class="col-sm-6">
                     {% if publicacion.estado == "retirada" %}Retirada (eliminación lógica)
                     {% elif publicacion.stock_disponible == 0 %}Sin existencias
+                    {% elif publicacion.unidades_libres == 0 %}Sin unidades libres (reservadas)
                     {% else %}Activa{% endif %}
                 </dd>
             </dl>
@@ -26,7 +29,7 @@
                 <div class="d-flex flex-wrap gap-2">
                     <a class="btn btn-outline-primary" href="{% url 'productos:editar' publicacion.pk %}">Editar</a>
                     <a class="btn btn-outline-danger" href="{% url 'productos:retirar' publicacion.pk %}">Retirar</a>
-                    {% if publicacion.stock_disponible > 0 %}
+                    {% if publicacion.unidades_libres > 0 %}
                         <a class="btn btn-outline-secondary" href="{% url 'productos:detalle' publicacion.pk %}">Ver artículo</a>
                     {% endif %}
                 </div>

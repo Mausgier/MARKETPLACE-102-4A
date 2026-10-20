@@ -3,6 +3,7 @@
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.validators import MinValueValidator
 from django.db import transaction
+from django.db.models import F
 from django.shortcuts import get_object_or_404
 
 from .models import Producto, Publicacion
@@ -77,9 +78,14 @@ def editar_publicacion(*, vendedor, pk, nombre, descripcion, categoria, precio,
     publicacion.precio = precio
     publicacion.stock_disponible = stock_disponible
     publicacion.full_clean()
-    # La actualización acotada conserva vendedor, estado y stock reservado.
-    # https://docs.djangoproject.com/en/5.2/ref/models/instances/#specifying-which-fields-to-save
-    publicacion.save(update_fields=["producto", "precio", "stock_disponible"])
+    # La condición se evalúa en la escritura: no reducir el físico bajo reservas
+    # creadas simultáneamente ni reactivar una oferta retirada mientras se editaba.
+    actualizada = Publicacion.objects.filter(
+        pk=pk, vendedor=vendedor, estado=Publicacion.Estado.ACTIVA,
+        stock_reservado__lte=stock_disponible,
+    ).update(producto=producto, precio=publicacion.precio, stock_disponible=stock_disponible)
+    if not actualizada:
+        raise ValidationError("No se puede reducir el stock físico bajo las unidades reservadas.")
     return publicacion
 
 

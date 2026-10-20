@@ -72,11 +72,11 @@ class Publicacion(models.Model):
         "Precio", max_digits=12, decimal_places=2,
         validators=[MinValueValidator(Decimal("0.01"))],
     )
-    # El modelo admite cero para el agotamiento futuro; el alta exige al menos uno.
+    # Unidades físicas totales: la disponibilidad libre descuenta las reservas.
     stock_disponible = models.PositiveIntegerField(
         "Unidades disponibles", validators=[MaxValueValidator(2147483647)],
     )
-    # Preparación estructural del UML: RF-04 no crea ni vence reservas temporales.
+    # Solo los servicios de órdenes alteran este contador temporal.
     stock_reservado = models.PositiveIntegerField(default=0, editable=False)
     estado = models.CharField(
         max_length=10, choices=Estado.choices, default=Estado.ACTIVA,
@@ -91,6 +91,10 @@ class Publicacion(models.Model):
         verbose_name = "Publicación"
         verbose_name_plural = "Publicaciones"
         constraints = [
+            models.CheckConstraint(
+                condition=models.Q(stock_reservado__lte=models.F("stock_disponible")),
+                name="publicacion_reserva_no_supera_fisico",
+            ),
             models.CheckConstraint(
                 condition=models.Q(precio__gt=0),
                 name="publicacion_precio_positivo",
@@ -108,6 +112,11 @@ class Publicacion(models.Model):
                 name="publicacion_estado_valido",
             ),
         ]
+
+    @property
+    def unidades_libres(self):
+        """Obtiene unidades físicas no comprometidas por reservas temporales."""
+        return self.stock_disponible - self.stock_reservado
 
     def __str__(self):
         """Identifica la oferta sin revelar datos privados del vendedor."""

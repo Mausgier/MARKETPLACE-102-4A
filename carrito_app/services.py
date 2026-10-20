@@ -18,7 +18,7 @@ def validar_cuenta(usuario):
         raise PermissionDenied("Debes iniciar sesión con una cuenta activa.")
 
 
-def _carrito_para_escritura(usuario, *, crear=False):
+def obtener_carrito_para_escritura(usuario, *, crear=False):
     """
     Serializa las operaciones del carrito dentro de la transacción del servicio.
 
@@ -46,11 +46,11 @@ def _validar_cantidad(publicacion, cantidad):
         raise ValidationError("La cantidad debe ser un entero positivo válido.")
     if publicacion.estado != Publicacion.Estado.ACTIVA:
         raise ValidationError("La publicación fue retirada y no puede añadirse o actualizarse.")
-    if publicacion.stock_disponible == 0:
+    if publicacion.unidades_libres == 0:
         raise ValidationError("El artículo no tiene existencias disponibles.")
-    if cantidad > publicacion.stock_disponible:
+    if cantidad > publicacion.unidades_libres:
         raise ValidationError(
-            f"La cantidad total seleccionada supera las {publicacion.stock_disponible} "
+            f"La cantidad total seleccionada supera las {publicacion.unidades_libres} "
             "unidades disponibles. Reduce la cantidad."
         )
 
@@ -58,7 +58,7 @@ def _validar_cantidad(publicacion, cantidad):
 @transaction.atomic
 def agregar_articulo(*, usuario, publicacion_id, cantidad):
     """Suma unidades en una única línea propia, leyendo el stock vigente."""
-    carrito = _carrito_para_escritura(usuario, crear=True)
+    carrito = obtener_carrito_para_escritura(usuario, crear=True)
     publicacion = get_object_or_404(Publicacion, pk=publicacion_id)
     item = ItemCarrito.objects.filter(
         carrito=carrito, publicacion=publicacion,
@@ -77,7 +77,7 @@ def agregar_articulo(*, usuario, publicacion_id, cantidad):
 @transaction.atomic
 def actualizar_articulo(*, usuario, item_id, cantidad):
     """Sustituye la cantidad solo de una línea perteneciente a la cuenta activa."""
-    carrito = _carrito_para_escritura(usuario)
+    carrito = obtener_carrito_para_escritura(usuario)
     item = get_object_or_404(
         ItemCarrito.objects.select_related("publicacion"),
         pk=item_id, carrito=carrito,
@@ -91,7 +91,7 @@ def actualizar_articulo(*, usuario, item_id, cantidad):
 @transaction.atomic
 def eliminar_articulo(*, usuario, item_id):
     """Elimina únicamente una selección propia, conservando producto y publicación."""
-    carrito = _carrito_para_escritura(usuario)
+    carrito = obtener_carrito_para_escritura(usuario)
     item = get_object_or_404(ItemCarrito, pk=item_id, carrito=carrito)
     item.delete()
 

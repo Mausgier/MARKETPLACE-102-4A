@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db import DatabaseError
-from django.db.models import Q
+from django.db.models import F, Q
 from django.http import QueryDict
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import never_cache
@@ -31,7 +31,7 @@ def publicaciones_disponibles():
     # select_related evita consultas adicionales por cada tarjeta o detalle.
     # https://docs.djangoproject.com/en/5.2/ref/models/querysets/#select-related
     return Publicacion.objects.filter(
-        estado=Publicacion.Estado.ACTIVA, stock_disponible__gt=0,
+        estado=Publicacion.Estado.ACTIVA, stock_disponible__gt=F("stock_reservado"),
     ).select_related("producto__categoria", "vendedor").order_by(
         "-fecha_creacion", "-pk",
     )
@@ -193,8 +193,8 @@ def modificar_publicacion(request, pk):
             editar_publicacion(vendedor=request.user, pk=pk, **formulario.cleaned_data)
         except ValidationError:
             formulario.add_error(
-                None, "No se pudo guardar. Revisa los datos y comprueba "
-                "que la publicación siga activa.",
+                None, "No se pudo guardar. Comprueba los datos, que la publicación "
+                "siga activa y que el stock físico no sea menor que las unidades reservadas.",
             )
         except DatabaseError:
             logger.exception("No se pudo completar la edición de una publicación.")

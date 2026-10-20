@@ -1,0 +1,20 @@
+{% extends "cuentas_app/base.html" %}
+{% block titulo %}Detalle de orden{% endblock %}
+{% block contenido %}
+<h1 class="h3">Orden {{ orden.pk }}</h1>
+<p>Estado: <strong>{{ orden.get_estado_display }}</strong></p>
+<p>Creación: {{ orden.creada_en|date:"d/m/Y H:i:s T" }}</p>
+<p>Vencimiento: {{ orden.vence_en|date:"d/m/Y H:i:s T" }}</p>
+{% if orden.reserva_vigente %}<p>Reserva vigente. El procesamiento de pagos todavía no está disponible.</p>
+{% else %}<p class="alert alert-warning">Reserva no vigente: esta orden no admite un pago posterior con la reserva vencida.</p>{% endif %}
+{% for detalle in detalles %}
+    <article class="card mb-3"><div class="card-body">
+        <h2 class="h5">{{ detalle.nombre_producto }}</h2>
+        <p>Vendedor: {{ detalle.vendedor.first_name|default:"Vendedor" }}</p>
+        <p>Cantidad: {{ detalle.cantidad }} · Precio registrado: {{ detalle.precio_unitario }}</p>
+        <p>Subtotal: {{ detalle.subtotal }}</p>
+    </div></article>
+{% endfor %}
+<p class="fw-semibold">Total registrado: {{ orden.total }}</p>
+<a href="{% url 'ordenes:lista' %}">Volver a Mis órdenes</a>
+{% endblock %}

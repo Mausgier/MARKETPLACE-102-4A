@@ -97,7 +97,7 @@ class PublicacionForm(forms.Form):
         help_text="Ingresa un monto mayor que cero, con hasta dos decimales.",
     )
     stock_disponible = forms.IntegerField(
-        label="Cantidad inicial disponible", min_value=1, max_value=2147483647,
+        label="Cantidad física inicial", min_value=1, max_value=2147483647,
         help_text="Ingresa un número entero igual o superior a uno.",
     )
 
@@ -115,9 +115,9 @@ class EdicionPublicacionForm(PublicacionForm):
     """Reutiliza las validaciones del alta, permitiendo disponibilidad cero en RF-05."""
 
     stock_disponible = forms.IntegerField(
-        label="Cantidad disponible", min_value=0, max_value=2147483647,
-        help_text=("Ingresa un número entero igual o superior a cero. "
-                   "Este cambio no modifica las unidades reservadas."),
+        label="Cantidad física total", min_value=0, max_value=2147483647,
+        help_text=("Incluye las unidades reservadas. No puede ser inferior a ellas; "
+                   "la disponibilidad libre se calcula restando las reservas."),
     )
 
     def __init__(self, *args, publicacion, **kwargs):

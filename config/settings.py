@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "cuentas_app.apps.CuentasAppConfig",
     "productos_app.apps.ProductosAppConfig",
     "carrito_app.apps.CarritoAppConfig",
+    "ordenes_app.apps.OrdenesAppConfig",
 
 ]
 

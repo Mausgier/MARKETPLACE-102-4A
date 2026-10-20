@@ -16,7 +16,7 @@
                 <dt class="col-sm-6">Precio unitario actual</dt><dd class="col-sm-6">{{ linea.item.publicacion.precio }}</dd>
                 <dt class="col-sm-6">Cantidad seleccionada</dt><dd class="col-sm-6">{{ linea.item.cantidad }}</dd>
                 <dt class="col-sm-6">Subtotal actual</dt><dd class="col-sm-6">{{ linea.item.subtotal }}</dd>
-                <dt class="col-sm-6">Unidades disponibles</dt><dd class="col-sm-6">{{ linea.item.publicacion.stock_disponible }}</dd>
+                <dt class="col-sm-6">Unidades disponibles</dt><dd class="col-sm-6">{{ linea.item.publicacion.unidades_libres }}</dd>
             </dl>
             {% if linea.item.problema_disponibilidad %}
                 <p class="alert alert-warning" role="status">{{ linea.item.problema_disponibilidad }}</p>
@@ -34,7 +34,7 @@
                     {% csrf_token %}
                     <button class="btn btn-outline-danger" type="submit">Eliminar del carrito</button>
                 </form>
-                {% if linea.item.publicacion.estado == "activa" and linea.item.publicacion.stock_disponible > 0 %}
+                {% if linea.item.publicacion.estado == "activa" and linea.item.publicacion.unidades_libres > 0 %}
                     <a href="{% url 'productos:detalle' linea.item.publicacion_id %}">Ver detalle</a>
                 {% endif %}
             </div>
@@ -46,6 +46,7 @@
 {% if lineas %}
     <p class="fs-5 fw-semibold">Total estimado del carrito: {{ total }}</p>
     {% if hay_incidencias %}<p>El total incluye las líneas con incidencias y no representa un importe válido para confirmar una compra.</p>{% endif %}
+    {% if not hay_incidencias %}<a class="btn btn-success mb-3" href="{% url 'ordenes:confirmar' %}">Revisar y generar orden</a>{% endif %}
 {% endif %}
 <a class="btn btn-primary" href="{% url 'productos:recientes' %}">Continuar en el catálogo</a>
 {% endblock %}
