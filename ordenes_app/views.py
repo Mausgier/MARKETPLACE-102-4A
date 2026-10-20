@@ -13,10 +13,26 @@ from django.views.decorators.http import require_http_methods, require_safe
 from carrito_app.services import validar_cuenta
 
 from .forms import ConfirmarOrdenForm
+from .consultas import compras_aprobadas_del_usuario
 from .models import OrdenCompra
 from .services import expirar_ordenes, generar_orden, preparar_confirmacion
 
 logger = logging.getLogger(__name__)
+
+
+@never_cache
+@login_required
+@require_safe
+def historial_compras(request):
+    """
+    Presenta RF-11 parcial sin convertir órdenes pendientes o vencidas en compras.
+
+    No ejecuta mantenimiento de reservas ni acepta propietarios desde la URL.
+    https://docs.djangoproject.com/en/5.2/topics/auth/default/#the-login-required-decorator
+    """
+    return render(request, "ordenes_app/historial.html", {
+        "compras": compras_aprobadas_del_usuario(usuario=request.user),
+    })
 
 
 @never_cache

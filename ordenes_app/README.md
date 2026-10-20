@@ -47,3 +47,18 @@ Referencias: [transacciones](https://docs.djangoproject.com/en/5.2/topics/db/tra
 [expresiones F](https://docs.djangoproject.com/en/5.2/ref/models/expressions/#avoiding-race-conditions-using-f),
 [firma](https://docs.djangoproject.com/en/5.2/topics/signing/),
 [bloqueos](https://docs.djangoproject.com/en/5.2/ref/models/querysets/#select-for-update).
+
+## RF-11: primera etapa del historial
+
+`/ordenes/historial/` requiere una cuenta activa y mantiene separado el historial
+de compras de «Mis órdenes». La consulta `compras_aprobadas_del_usuario` restringe
+el propietario y devuelve deliberadamente `none()`: todavía no hay pagos aprobados
+ni pedidos definitivos. Consultar el historial no expira órdenes ni altera reservas.
+
+Quedan pendientes la integración verificable con RF-19 y la presentación de cada
+compra con identificador, fecha efectiva de aprobación (no fecha de creación de la
+orden), total histórico, número de pedidos, enlace al detalle y vendedores/estados
+de sus pedidos. No debe sustituirse `none()` por todas las órdenes del comprador
+ni usar las reservas como evidencia de pago. La selección de datos y las plantillas
+de registros y detalle se completarán junto con esas dependencias. No se incorporan
+estados, campos o relaciones ficticios en esta primera etapa.

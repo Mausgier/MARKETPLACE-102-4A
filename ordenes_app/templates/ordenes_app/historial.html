@@ -1,0 +1,21 @@
+{% extends "cuentas_app/base.html" %}
+
+{% block titulo %}Historial de compras{% endblock %}
+
+{% block contenido %}
+<section class="card border-0 shadow-sm" aria-labelledby="titulo-historial">
+    <div class="card-body p-4 p-md-5">
+        <h1 class="h3 mb-3" id="titulo-historial">Historial de compras</h1>
+        <p class="text-body-secondary">Aquí se mostrarán exclusivamente las compras cuyo pago haya sido aprobado.</p>
+        {# RF-11 parcial: no representar órdenes pendientes como compras ni inventar pedidos. #}
+        {% if not compras %}
+            <div class="alert alert-info" role="status">Todavía no tienes compras completadas.</div>
+        {% endif %}
+        <p>Las órdenes pendientes de pago o expiradas se consultan por separado en «Mis órdenes».</p>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-primary" href="{% url 'ordenes:lista' %}">Mis órdenes</a>
+            <a class="btn btn-primary" href="{% url 'productos:recientes' %}">Volver al catálogo</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -22,6 +22,7 @@
                 {% if user.is_authenticated %}
                     <a class="btn btn-outline-primary btn-sm" href="{% url 'carrito:ver' %}">Mi carrito</a>
                     <a class="btn btn-outline-primary btn-sm" href="{% url 'ordenes:lista' %}">Mis órdenes</a>
+                    <a class="btn btn-outline-primary btn-sm" href="{% url 'ordenes:historial' %}">Historial de compras</a>
                     <a class="btn btn-primary btn-sm" href="{% url 'productos:publicar' %}">Publicar</a>
                     <a class="btn btn-outline-primary btn-sm" href="{% url 'productos:mis_publicaciones' %}">Mis publicaciones</a>
                     <a class="btn btn-outline-primary btn-sm" href="{% url 'cuentas:inicio' %}">Mi cuenta</a>
