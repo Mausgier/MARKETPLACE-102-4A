@@ -1,0 +1,23 @@
+{% extends "cuentas_app/base.html" %}
+
+{% block titulo %}{{ publicacion.producto.nombre }}{% endblock %}
+
+{% block contenido %}
+<article class="card border-0 shadow-sm">
+    <div class="card-body p-4 p-md-5">
+        <p class="small text-body-secondary mb-2">{{ publicacion.producto.categoria }}</p>
+        <h1 class="h3 mb-3">{{ publicacion.producto.nombre }}</h1>
+        <div class="mb-4">{{ publicacion.producto.descripcion|linebreaksbr }}</div>
+        <dl class="row">
+            <dt class="col-sm-5">Precio</dt><dd class="col-sm-7">{{ publicacion.precio }}</dd>
+            <dt class="col-sm-5">Unidades disponibles</dt><dd class="col-sm-7">{{ publicacion.stock_disponible }}</dd>
+            <dt class="col-sm-5">Publicado por</dt><dd class="col-sm-7">{{ publicacion.vendedor.first_name|default:"Vendedor" }}</dd>
+            <dt class="col-sm-5">Estado</dt><dd class="col-sm-7">{{ publicacion.get_estado_display }}</dd>
+        </dl>
+        <a href="{% url 'productos:recientes' %}">Ver artículos publicados</a>
+        {% if user.is_authenticated %}
+            <a class="btn btn-primary w-100 mt-3" href="{% url 'productos:publicar' %}">Publicar otro artículo</a>
+        {% endif %}
+    </div>
+</article>
+{% endblock %}

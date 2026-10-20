@@ -18,7 +18,9 @@
             <a class="fs-5 fw-semibold text-decoration-none text-dark"
                href="{% url 'cuentas:inicio' %}">Mercado en línea</a>
             <nav class="d-flex flex-wrap align-items-center gap-2" aria-label="Navegación principal">
+                <a class="btn btn-outline-primary btn-sm" href="{% url 'productos:recientes' %}">Artículos</a>
                 {% if user.is_authenticated %}
+                    <a class="btn btn-primary btn-sm" href="{% url 'productos:publicar' %}">Publicar</a>
                     <a class="btn btn-outline-primary btn-sm" href="{% url 'cuentas:inicio' %}">Mi cuenta</a>
                     <a class="btn btn-outline-primary btn-sm" href="{% url 'cuentas:perfil' %}">Mi perfil</a>
                     {% if user.is_staff %}

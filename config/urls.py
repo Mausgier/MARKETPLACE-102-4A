@@ -12,5 +12,6 @@ urlpatterns = [
     # El inicio de cuenta conduce al acceso cuando no existe una sesión autenticada.
     path('', RedirectView.as_view(pattern_name='cuentas:inicio', permanent=False)),
     path('cuentas/', include('cuentas_app.urls')),
+    path('articulos/', include('productos_app.urls')),
     path('admin/', admin.site.urls),
 ]

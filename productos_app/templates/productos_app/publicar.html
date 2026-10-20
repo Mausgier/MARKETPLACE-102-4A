@@ -1,0 +1,29 @@
+{% extends "cuentas_app/base.html" %}
+
+{% block titulo %}Publicar artículo{% endblock %}
+
+{% block contenido %}
+<section class="card border-0 shadow-sm" aria-labelledby="titulo-publicar">
+    <div class="card-body p-4 p-md-5">
+        <h1 class="h3 mb-2" id="titulo-publicar">Publicar un artículo</h1>
+        <p class="text-body-secondary mb-4">Describe tu artículo e indica su precio y disponibilidad.</p>
+        <p class="small">Todos los campos son obligatorios.</p>
+        {# https://docs.djangoproject.com/en/5.2/howto/csrf/ #}
+        <form method="post" action="{% url 'productos:publicar' %}" novalidate>
+            {% csrf_token %}
+            {% if formulario.errors %}
+                <div class="alert alert-danger" role="alert">
+                    No pudimos crear la publicación. Revisa los datos indicados.
+                </div>
+            {% endif %}
+            {% if formulario.non_field_errors %}
+                <div class="alert alert-danger" role="alert">{{ formulario.non_field_errors }}</div>
+            {% endif %}
+            {% include "cuentas_app/campos_formulario.html" with formulario=formulario only %}
+            <button class="btn btn-primary w-100 mt-2" type="submit">Publicar artículo</button>
+        </form>
+        <p class="small text-body-secondary mt-3">La publicación quedará asociada a tu cuenta.</p>
+        <a href="{% url 'productos:recientes' %}">Ver artículos publicados</a>
+    </div>
+</section>
+{% endblock %}

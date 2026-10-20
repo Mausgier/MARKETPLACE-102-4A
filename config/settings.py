@@ -60,6 +60,7 @@ INSTALLED_APPS = [
 
     # Aplicación encargada de la gestión de cuentas de usuario.
     "cuentas_app.apps.CuentasAppConfig",
+    "productos_app.apps.ProductosAppConfig",
 
 ]
 
