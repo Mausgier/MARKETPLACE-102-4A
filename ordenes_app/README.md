@@ -62,3 +62,23 @@ de sus pedidos. No debe sustituirse `none()` por todas las órdenes del comprado
 ni usar las reservas como evidencia de pago. La selección de datos y las plantillas
 de registros y detalle se completarán junto con esas dependencias. No se incorporan
 estados, campos o relaciones ficticios en esta primera etapa.
+
+## RF-12: primera etapa de consulta de ventas
+
+`/ordenes/ventas/` exige sesión y cuenta activa, independientemente de la preferencia
+comercial. `ventas_del_usuario` delimita al vendedor de la sesión y devuelve un
+conjunto vacío mediante el ORM. Reutiliza el vínculo histórico de `DetalleOrden`
+únicamente como punto preparatorio: esos detalles no constituyen pedidos ni ventas.
+La consulta no modifica órdenes, inventario o reservas ni ejecuta expiraciones.
+
+La integración definitiva deberá seleccionar los pedidos propios por vendedor,
+originados en órdenes con pago aprobado. Deberá incorporar identificador de pedido,
+fecha, productos, comprador, total y estado, además del reembolso cuando corresponda.
+Los pedidos cancelados deberán permanecer en el historial: no se filtrarán por
+exclusión de ese estado. La cancelación y el reembolso no invalidan el origen
+histórico de una venta cuyo pago fue aprobado.
+
+RF-12 sigue parcial: no hay pedidos definitivos, pagos aprobados ni reembolsos.
+La futura consulta y presentación de registros deberán sustituir expresamente el
+conjunto vacío; no basta con devolver detalles u órdenes existentes. No se añaden
+estados, entidades o migraciones provisionales.

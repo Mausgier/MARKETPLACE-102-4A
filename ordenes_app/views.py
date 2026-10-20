@@ -13,11 +13,26 @@ from django.views.decorators.http import require_http_methods, require_safe
 from carrito_app.services import validar_cuenta
 
 from .forms import ConfirmarOrdenForm
-from .consultas import compras_aprobadas_del_usuario
+from .consultas import compras_aprobadas_del_usuario, ventas_del_usuario
 from .models import OrdenCompra
 from .services import expirar_ordenes, generar_orden, preparar_confirmacion
 
 logger = logging.getLogger(__name__)
+
+
+@never_cache
+@login_required
+@require_safe
+def mis_ventas(request):
+    """
+    Presenta RF-12 parcial con identidad de sesión y sin operaciones de escritura.
+
+    No acepta un vendedor desde parámetros ni ejecuta expiraciones de reservas.
+    https://docs.djangoproject.com/en/5.2/topics/auth/default/#the-login-required-decorator
+    """
+    return render(request, "ordenes_app/ventas.html", {
+        "ventas": ventas_del_usuario(usuario=request.user),
+    })
 
 
 @never_cache

@@ -1,0 +1,21 @@
+{% extends "cuentas_app/base.html" %}
+
+{% block titulo %}Mis ventas{% endblock %}
+
+{% block contenido %}
+<section class="card border-0 shadow-sm" aria-labelledby="titulo-ventas">
+    <div class="card-body p-4 p-md-5">
+        <h1 class="h3 mb-3" id="titulo-ventas">Mis ventas</h1>
+        <p class="text-body-secondary">Aquí se mostrarán los pedidos de tus publicaciones originados en órdenes con pago aprobado.</p>
+        {# RF-12 parcial: no convertir órdenes pendientes ni reservas en ventas. #}
+        {% if not ventas %}
+            <div class="alert alert-info" role="status">Todavía no tienes ventas registradas.</div>
+        {% endif %}
+        <p>Las publicaciones y las reservas temporales no representan ventas registradas.</p>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-primary" href="{% url 'productos:mis_publicaciones' %}">Mis publicaciones</a>
+            <a class="btn btn-primary" href="{% url 'productos:recientes' %}">Volver al catálogo</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
