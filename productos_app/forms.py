@@ -1,10 +1,29 @@
-"""Formularios públicos de alta y edición de productos y publicaciones."""
+"""Formularios públicos de búsqueda, alta y edición de productos y publicaciones."""
 
 from decimal import Decimal
 
 from django import forms
 
 from .models import Categoria
+
+
+class BusquedaProductosForm(forms.Form):
+    """
+    Valida un término opcional; vacío recupera el catálogo sin búsqueda.
+
+    https://docs.djangoproject.com/en/5.2/ref/forms/fields/#charfield
+    """
+
+    q = forms.CharField(
+        label="Buscar productos", required=False, max_length=150, strip=True,
+        help_text="Busca una palabra o frase en el nombre o la descripción (máximo 150 caracteres).",
+        error_messages={
+            "max_length": "El término de búsqueda no puede superar los 150 caracteres.",
+        },
+        widget=forms.TextInput(attrs={
+            "type": "search", "class": "form-control",
+        }),
+    )
 
 
 class PublicacionForm(forms.Form):
