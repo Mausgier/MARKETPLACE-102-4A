@@ -1,0 +1,14 @@
+{# Información privada compartida por listado y detalle administrativos. #}
+<dl class="row mb-2">
+    <dt class="col-sm-5">Publicación</dt><dd class="col-sm-7">{{ publicacion.pk }}</dd>
+    <dt class="col-sm-5">Categoría</dt><dd class="col-sm-7">{{ publicacion.producto.categoria.nombre }}</dd>
+    <dt class="col-sm-5">Vendedor</dt><dd class="col-sm-7">{{ publicacion.vendedor.first_name }} {{ publicacion.vendedor.last_name }} · {{ publicacion.vendedor.email }} (ID {{ publicacion.vendedor_id }})</dd>
+    <dt class="col-sm-5">Precio</dt><dd class="col-sm-7">{{ publicacion.precio }}</dd>
+    <dt class="col-sm-5">Unidades físicas</dt><dd class="col-sm-7">{{ publicacion.stock_disponible }}</dd>
+    <dt class="col-sm-5">Unidades reservadas</dt><dd class="col-sm-7">{{ publicacion.stock_reservado }}</dd>
+    <dt class="col-sm-5">Unidades libres</dt><dd class="col-sm-7">{{ publicacion.unidades_libres }}</dd>
+    <dt class="col-sm-5">Estado</dt><dd class="col-sm-7">{{ publicacion.get_estado_display }}</dd>
+</dl>
+{% if publicacion.estado == "activa" and publicacion.unidades_libres == 0 %}
+    <p class="small text-body-secondary">Sin unidades libres para nuevas compras.</p>
+{% endif %}

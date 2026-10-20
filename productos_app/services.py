@@ -93,12 +93,24 @@ def editar_publicacion(*, vendedor, pk, nombre, descripcion, categoria, precio,
 def retirar_publicacion(*, vendedor, pk):
     """Retira sin borrar la oferta ni sus relaciones comerciales; repetir es inocuo."""
     publicacion = obtener_publicacion_propia(vendedor=vendedor, pk=pk)
+    _retirar_sin_reservas(publicacion)
+
+
+def _retirar_sin_reservas(publicacion):
+    """
+    Comparte la regla de retiro entre servicios que ya comprobaron autorización.
+
+    Debe ejecutarse en la transacción del servicio vendedor o administrativo.
+    La condición de escritura protege frente a reservas adquiridas simultáneamente.
+    https://docs.djangoproject.com/en/5.2/ref/models/querysets/#update
+    """
     if publicacion.estado == Publicacion.Estado.RETIRADA:
         return
-    # Salvaguarda para futuros procesos: RF-05 no libera ni administra reservas.
+    # Retirar no libera ni administra las reservas de RF-10.
     # La condición se comprueba en la escritura, sin sobrescribir otros campos.
     actualizadas = Publicacion.objects.filter(
-        pk=pk, vendedor=vendedor, estado=Publicacion.Estado.ACTIVA,
+        pk=publicacion.pk, vendedor_id=publicacion.vendedor_id,
+        estado=Publicacion.Estado.ACTIVA,
         stock_reservado=0,
     ).update(estado=Publicacion.Estado.RETIRADA)
     if not actualizadas:

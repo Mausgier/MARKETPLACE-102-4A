@@ -29,6 +29,9 @@
                     <a class="btn btn-outline-primary btn-sm" href="{% url 'cuentas:inicio' %}">Mi cuenta</a>
                     <a class="btn btn-outline-primary btn-sm" href="{% url 'cuentas:perfil' %}">Mi perfil</a>
                     {% if user.is_staff %}
+                        {% if perms.productos_app.change_publicacion %}
+                            <a class="btn btn-outline-secondary btn-sm" href="{% url 'productos:administrar_publicaciones' %}">Administrar publicaciones</a>
+                        {% endif %}
                         {% if perms.cuentas_app.change_usuario %}
                             <a class="btn btn-outline-secondary btn-sm" href="{% url 'cuentas:administrar_usuarios' %}">Administrar usuarios</a>
                         {% endif %}

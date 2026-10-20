@@ -1,0 +1,20 @@
+{% extends "cuentas_app/base.html" %}
+{% block titulo %}Administración de publicaciones{% endblock %}
+{% block contenido %}
+<h1 class="h3 mb-3">Administración de publicaciones</h1>
+<p class="text-body-secondary">Publicaciones de todos los vendedores, incluidas las retiradas y sin existencias.</p>
+{% for publicacion in pagina %}
+    <article class="card border-0 shadow-sm mb-3"><div class="card-body p-4">
+        <h2 class="h5">{{ publicacion.producto.nombre }}</h2>
+        {% include "productos_app/administracion_datos.html" with publicacion=publicacion only %}
+        <a class="btn btn-outline-primary" href="{% url 'productos:detalle_administrativo' publicacion.pk %}">Revisar publicación</a>
+    </div></article>
+{% empty %}<p>No hay publicaciones registradas.</p>{% endfor %}
+{% if pagina.has_other_pages %}
+    <nav class="d-flex flex-wrap align-items-center gap-3" aria-label="Páginas de publicaciones">
+        {% if pagina.has_previous %}<a href="?page={{ pagina.previous_page_number }}">Anterior</a>{% endif %}
+        <span>Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+        {% if pagina.has_next %}<a href="?page={{ pagina.next_page_number }}">Siguiente</a>{% endif %}
+    </nav>
+{% endif %}
+{% endblock %}
