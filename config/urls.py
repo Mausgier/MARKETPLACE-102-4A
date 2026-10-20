@@ -13,5 +13,6 @@ urlpatterns = [
     path('', RedirectView.as_view(pattern_name='cuentas:inicio', permanent=False)),
     path('cuentas/', include('cuentas_app.urls')),
     path('articulos/', include('productos_app.urls')),
+    path('carrito/', include('carrito_app.urls')),
     path('admin/', admin.site.urls),
 ]

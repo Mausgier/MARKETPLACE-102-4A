@@ -16,6 +16,12 @@
         </dl>
         <a href="{% url 'productos:recientes' %}">Ver artículos publicados</a>
         {% if user.is_authenticated %}
+            <form method="post" action="{% url 'carrito:agregar' publicacion.pk %}" class="my-3">
+                {% csrf_token %}
+                {{ formulario_carrito.cantidad.label_tag }}
+                {{ formulario_carrito.cantidad }}
+                <button class="btn btn-success w-100 mt-2" type="submit">Añadir al carrito</button>
+            </form>
             {% if user.pk == publicacion.vendedor_id %}
                 <div class="d-flex flex-wrap gap-2 mt-3">
                     <a class="btn btn-outline-primary" href="{% url 'productos:editar' publicacion.pk %}">Editar publicación</a>
@@ -23,6 +29,8 @@
                 </div>
             {% endif %}
             <a class="btn btn-primary w-100 mt-3" href="{% url 'productos:publicar' %}">Publicar otro artículo</a>
+        {% else %}
+            <p class="mt-3"><a href="{% url 'cuentas:iniciar_sesion' %}?next={% url 'productos:detalle' publicacion.pk %}">Inicia sesión para añadir al carrito</a></p>
         {% endif %}
     </div>
 </article>

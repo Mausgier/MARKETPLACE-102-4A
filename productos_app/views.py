@@ -13,6 +13,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_http_methods, require_safe
 
+from carrito_app.forms import CantidadCarritoForm
+
 from .forms import CatalogoProductosForm, EdicionPublicacionForm, PublicacionForm
 from .models import Publicacion
 from .services import (
@@ -156,7 +158,10 @@ def detalle_publicacion(request, pk):
     """Permite consultar públicamente una oferta disponible sin exponer datos privados."""
     publicacion = get_object_or_404(publicaciones_disponibles(), pk=pk)
     return render(
-        request, "productos_app/detalle.html", {"publicacion": publicacion}
+        request, "productos_app/detalle.html", {
+            "publicacion": publicacion,
+            "formulario_carrito": CantidadCarritoForm(initial={"cantidad": 1}),
+        }
     )
 
 

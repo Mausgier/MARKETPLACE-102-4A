@@ -1,0 +1,51 @@
+{% extends "cuentas_app/base.html" %}
+
+{% block titulo %}Mi carrito{% endblock %}
+
+{% block contenido %}
+<h1 class="h3 mb-3">Mi carrito</h1>
+<p class="text-body-secondary">Los importes utilizan los precios actuales y no son definitivos. El carrito no reserva existencias.</p>
+{% if hay_incidencias %}
+    <div class="alert alert-warning" role="alert">El carrito requiere ajustes. Los artículos indicados no están disponibles en la cantidad seleccionada y no son válidos para una compra.</div>
+{% endif %}
+{% for linea in lineas %}
+    <article class="card border-0 shadow-sm mb-3">
+        <div class="card-body p-4">
+            <h2 class="h5">{{ linea.item.publicacion.producto.nombre }}</h2>
+            <dl class="row">
+                <dt class="col-sm-6">Precio unitario actual</dt><dd class="col-sm-6">{{ linea.item.publicacion.precio }}</dd>
+                <dt class="col-sm-6">Cantidad seleccionada</dt><dd class="col-sm-6">{{ linea.item.cantidad }}</dd>
+                <dt class="col-sm-6">Subtotal actual</dt><dd class="col-sm-6">{{ linea.item.subtotal }}</dd>
+                <dt class="col-sm-6">Unidades disponibles</dt><dd class="col-sm-6">{{ linea.item.publicacion.stock_disponible }}</dd>
+            </dl>
+            {% if linea.item.problema_disponibilidad %}
+                <p class="alert alert-warning" role="status">{{ linea.item.problema_disponibilidad }}</p>
+            {% else %}
+                <p class="text-success">Disponible en la cantidad seleccionada al consultar.</p>
+            {% endif %}
+            <form method="post" action="{% url 'carrito:actualizar' linea.item.pk %}" class="mb-3">
+                {% csrf_token %}
+                {{ linea.formulario.cantidad.label_tag }}
+                {{ linea.formulario.cantidad }}
+                <button class="btn btn-outline-primary mt-2" type="submit">Actualizar cantidad</button>
+            </form>
+            <div class="d-flex flex-wrap align-items-center gap-3">
+                <form method="post" action="{% url 'carrito:eliminar' linea.item.pk %}">
+                    {% csrf_token %}
+                    <button class="btn btn-outline-danger" type="submit">Eliminar del carrito</button>
+                </form>
+                {% if linea.item.publicacion.estado == "activa" and linea.item.publicacion.stock_disponible > 0 %}
+                    <a href="{% url 'productos:detalle' linea.item.publicacion_id %}">Ver detalle</a>
+                {% endif %}
+            </div>
+        </div>
+    </article>
+{% empty %}
+    <div class="alert alert-info" role="status">Tu carrito está vacío.</div>
+{% endfor %}
+{% if lineas %}
+    <p class="fs-5 fw-semibold">Total estimado del carrito: {{ total }}</p>
+    {% if hay_incidencias %}<p>El total incluye las líneas con incidencias y no representa un importe válido para confirmar una compra.</p>{% endif %}
+{% endif %}
+<a class="btn btn-primary" href="{% url 'productos:recientes' %}">Continuar en el catálogo</a>
+{% endblock %}
