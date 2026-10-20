@@ -12,6 +12,7 @@ app_name = "cuentas"
 
 urlpatterns = [
     path("", views.inicio_cuenta, name="inicio"),
+    path("perfil/", views.perfil_usuario, name="perfil"),
     path("registro/", views.registro_usuario, name="registro"),
     path(
         "iniciar-sesion/",

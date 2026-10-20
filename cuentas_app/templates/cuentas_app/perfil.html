@@ -1,0 +1,39 @@
+{% extends "cuentas_app/base.html" %}
+
+{% block titulo %}Mi perfil{% endblock %}
+
+{% block contenido %}
+<section class="card border-0 shadow-sm" aria-labelledby="titulo-perfil">
+    <div class="card-body p-4 p-md-5">
+        <h1 class="h3 mb-2" id="titulo-perfil">Mi perfil</h1>
+        <p class="text-body-secondary mb-4">Consulta y actualiza tus datos personales.</p>
+        <p class="small">Todos los campos son obligatorios.</p>
+
+        {# La cuenta se determina en el servidor; no se envían campos de propietario. #}
+        {# https://docs.djangoproject.com/en/5.2/howto/csrf/ #}
+        <form method="post" action="{% url 'cuentas:perfil' %}" novalidate>
+            {% csrf_token %}
+            {% if formulario.errors %}
+                <div class="alert alert-danger" role="alert">
+                    No pudimos actualizar tu perfil. Revisa los campos indicados.
+                    Tus cambios no se han guardado.
+                </div>
+            {% endif %}
+            {% if formulario.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ formulario.non_field_errors }}
+                </div>
+            {% endif %}
+
+            {% include "cuentas_app/campos_formulario.html" with formulario=formulario only %}
+            <button class="btn btn-primary w-100 mt-2" type="submit">Guardar cambios</button>
+        </form>
+
+        <p class="small text-body-secondary mt-4">
+            Preferencia comercial inicial: {{ user.get_rol_display|lower }}.
+            Esta preferencia no limita tus actividades de compra y venta.
+        </p>
+        <a href="{% url 'cuentas:inicio' %}">Volver al inicio</a>
+    </div>
+</section>
+{% endblock %}

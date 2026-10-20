@@ -1,4 +1,4 @@
-"""Vistas de registro, autenticación e inicio de cuenta del marketplace."""
+"""Vistas de registro, autenticación y perfil propio del marketplace."""
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -9,7 +9,12 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.http import require_http_methods
 
-from .forms import InicioSesionForm, RegistroUsuarioForm
+from .forms import (
+    MENSAJE_CORREO_DUPLICADO,
+    InicioSesionForm,
+    PerfilUsuarioForm,
+    RegistroUsuarioForm,
+)
 from .models import Usuario
 
 
@@ -48,7 +53,7 @@ def registro_usuario(request):
                 email__iexact=formulario.cleaned_data["email"]
             ).exists():
                 formulario.add_error(
-                    "email", RegistroUsuarioForm.MENSAJE_CORREO_DUPLICADO
+                    "email", MENSAJE_CORREO_DUPLICADO
                 )
             else:
                 # No oculta errores de integridad ajenos a un correo duplicado.
@@ -101,10 +106,53 @@ class CierreSesionView(LogoutView):
 @login_required
 def inicio_cuenta(request):
     """
-    Presenta el inicio privado sin implementar todavía la gestión de perfil.
+    Presenta la bienvenida y la navegación de una cuenta autenticada.
 
     https://docs.djangoproject.com/en/5.2/topics/auth/default/#the-login-required-decorator
     https://docs.djangoproject.com/en/5.2/topics/http/decorators/#caching
     """
     # RN-01: el acceso es común y no depende de la preferencia comercial.
     return render(request, "cuentas_app/inicio.html")
+
+
+@never_cache
+@login_required
+@require_http_methods(["GET", "POST"])
+def perfil_usuario(request):
+    """
+    Consulta y actualiza exclusivamente el perfil de la cuenta autenticada.
+
+    https://docs.djangoproject.com/en/5.2/topics/forms/modelforms/#the-save-method
+    https://docs.djangoproject.com/en/5.2/ref/models/instances/#specifying-which-fields-to-save
+    """
+    # La sesión determina el propietario: no se admiten identificadores externos.
+    formulario = PerfilUsuarioForm(
+        request.POST if request.method == "POST" else None,
+        instance=request.user,
+    )
+
+    if request.method == "POST" and formulario.is_valid():
+        try:
+            with transaction.atomic():
+                usuario = formulario.save(commit=False)
+                # Evita sobrescribir contraseña, permisos o cambios administrativos
+                # concurrentes: el UPDATE incluye solo los campos personales.
+                usuario.save(update_fields=PerfilUsuarioForm.Meta.fields)
+        except IntegrityError:
+            # Controla un correo ocupado después de validar, una vez revertido atomic.
+            if Usuario.objects.filter(
+                email__iexact=formulario.cleaned_data["email"]
+            ).exclude(pk=request.user.pk).exists():
+                formulario.add_error("email", MENSAJE_CORREO_DUPLICADO)
+            else:
+                raise
+        else:
+            messages.success(request, "Tu perfil se actualizó correctamente.")
+            # La nueva consulta muestra los valores persistidos y evita reenviar POST.
+            return redirect("cuentas:perfil")
+
+    return render(
+        request,
+        "cuentas_app/perfil.html",
+        {"formulario": formulario},
+    )

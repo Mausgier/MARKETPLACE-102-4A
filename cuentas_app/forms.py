@@ -4,13 +4,32 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from .models import Usuario
 
 
+MENSAJE_CORREO_DUPLICADO = "Este correo electrónico ya está registrado."
+
+
+def validar_correo_unico(correo, *, excluir_usuario_id=None):
+    """
+    Normaliza el correo y verifica su unicidad en el registro y la edición propia.
+
+    https://docs.djangoproject.com/en/5.2/ref/forms/validation/#cleaning-a-specific-field-attribute
+    """
+    correo = correo.strip().lower()
+    coincidencias = Usuario.objects.filter(email__iexact=correo)
+    # El propietario puede conservar su correo sin considerarse un duplicado.
+    if excluir_usuario_id is not None:
+        coincidencias = coincidencias.exclude(pk=excluir_usuario_id)
+    if coincidencias.exists():
+        raise forms.ValidationError(
+            MENSAJE_CORREO_DUPLICADO, code="correo_duplicado"
+        )
+    return correo
+
+
 class RegistroUsuarioForm(UserCreationForm):
     """
     Gestiona los datos y las validaciones necesarias para registrar compradores y vendedores.
     https://docs.djangoproject.com/en/5.2/topics/auth/default/#django.contrib.auth.forms.UserCreationForm
     """
-
-    MENSAJE_CORREO_DUPLICADO = "Este correo electrónico ya está registrado."
 
     # Solicita el nombre como campo obligatorio.
     first_name = forms.CharField(
@@ -79,17 +98,7 @@ class RegistroUsuarioForm(UserCreationForm):
         Normaliza el correo electrónico y comprueba que no exista otra cuenta con la misma dirección.
         """
 
-        # Obtiene el correo validado por el campo 'EmailField'.
-        email = self.cleaned_data["email"].strip().lower()
-
-        # Impide registrar correos existentes, incluso cuando contienen diferencias entre mayúsculas y minúsculas.
-        if Usuario.objects.filter(email__iexact=email).exists():
-            raise forms.ValidationError(
-                self.MENSAJE_CORREO_DUPLICADO,
-                code="correo_duplicado",
-            )
-
-        return email
+        return validar_correo_unico(self.cleaned_data["email"])
 
 
 class InicioSesionForm(AuthenticationForm):
@@ -129,3 +138,44 @@ class InicioSesionForm(AuthenticationForm):
     def clean_username(self):
         """Aplica al correo la misma normalización utilizada durante el registro."""
         return self.cleaned_data["username"].strip().lower()
+
+
+class PerfilUsuarioForm(forms.ModelForm):
+    """
+    Permite editar únicamente los datos personales autorizados de una cuenta.
+
+    https://docs.djangoproject.com/en/5.2/topics/forms/modelforms/#selecting-the-fields-to-use
+    """
+
+    class Meta:
+        """Excluye contraseña, preferencia comercial y atributos administrativos."""
+
+        model = Usuario
+        fields = ("first_name", "last_name", "email")
+        labels = {"first_name": "Nombre", "last_name": "Apellido"}
+        help_texts = {
+            "email": "Este correo se utilizará para tus próximos inicios de sesión."
+        }
+        widgets = {
+            "first_name": forms.TextInput(attrs={
+                "class": "form-control", "autocomplete": "given-name",
+            }),
+            "last_name": forms.TextInput(attrs={
+                "class": "form-control", "autocomplete": "family-name",
+            }),
+            "email": forms.EmailInput(attrs={
+                "class": "form-control", "autocomplete": "email",
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        """Mantiene nombre y apellido obligatorios, como en el registro público."""
+        super().__init__(*args, **kwargs)
+        self.fields["first_name"].required = True
+        self.fields["last_name"].required = True
+
+    def clean_email(self):
+        """Comprueba el correo sin confundir la cuenta editada con otra cuenta."""
+        return validar_correo_unico(
+            self.cleaned_data["email"], excluir_usuario_id=self.instance.pk
+        )
