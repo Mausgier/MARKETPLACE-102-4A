@@ -1,0 +1,42 @@
+{% extends "cuentas_app/base.html" %}
+
+{% block titulo %}Administración de usuarios{% endblock %}
+
+{% block contenido %}
+<h1 class="h3 mb-3">Administración de usuarios</h1>
+<p class="text-body-secondary">Suspender impide iniciar sesión e invalida las sesiones almacenadas de la cuenta. Sus datos comerciales se conservan.</p>
+<p class="small">Las cuentas administrativas están protegidas contra suspensión en esta interfaz.</p>
+{% for cuenta in pagina %}
+    <article class="card border-0 shadow-sm mb-3">
+        <div class="card-body p-4">
+            <h2 class="h5">{{ cuenta.first_name }} {{ cuenta.last_name }}</h2>
+            <p class="mb-1">{{ cuenta.email }}</p>
+            <p class="small text-body-secondary">ID: {{ cuenta.pk }}</p>
+            <p>Estado: <strong>{% if cuenta.is_active %}Activa{% else %}Suspendida / inactiva{% endif %}</strong></p>
+            {% if cuenta.is_staff or cuenta.is_superuser %}
+                <p class="small">Cuenta administrativa protegida.</p>
+            {% endif %}
+            {% if cuenta.is_active %}
+                {% if not cuenta.is_staff and not cuenta.is_superuser and cuenta.pk != user.pk %}
+                    <form method="post" action="{% url 'cuentas:suspender_usuario' cuenta.pk %}">
+                        {% csrf_token %}
+                        <button class="btn btn-outline-danger" type="submit">Suspender cuenta</button>
+                    </form>
+                {% endif %}
+            {% else %}
+                <form method="post" action="{% url 'cuentas:reactivar_usuario' cuenta.pk %}">
+                    {% csrf_token %}
+                    <button class="btn btn-outline-success" type="submit">Reactivar cuenta</button>
+                </form>
+            {% endif %}
+        </div>
+    </article>
+{% empty %}<p>No hay cuentas registradas.</p>{% endfor %}
+{% if pagina.has_other_pages %}
+    <nav class="d-flex flex-wrap align-items-center gap-3" aria-label="Páginas de usuarios">
+        {% if pagina.has_previous %}<a href="?page={{ pagina.previous_page_number }}">Anterior</a>{% endif %}
+        <span>Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+        {% if pagina.has_next %}<a href="?page={{ pagina.next_page_number }}">Siguiente</a>{% endif %}
+    </nav>
+{% endif %}
+{% endblock %}

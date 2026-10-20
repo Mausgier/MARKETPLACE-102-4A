@@ -29,6 +29,9 @@
                     <a class="btn btn-outline-primary btn-sm" href="{% url 'cuentas:inicio' %}">Mi cuenta</a>
                     <a class="btn btn-outline-primary btn-sm" href="{% url 'cuentas:perfil' %}">Mi perfil</a>
                     {% if user.is_staff %}
+                        {% if perms.cuentas_app.change_usuario %}
+                            <a class="btn btn-outline-secondary btn-sm" href="{% url 'cuentas:administrar_usuarios' %}">Administrar usuarios</a>
+                        {% endif %}
                         <a class="btn btn-outline-secondary btn-sm" href="{% url 'admin:index' %}">Administración</a>
                     {% endif %}
                     {# LogoutView admite POST; el enlace GET no debe cerrar sesiones. #}
