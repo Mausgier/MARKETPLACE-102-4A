@@ -16,6 +16,12 @@
         </dl>
         <a href="{% url 'productos:recientes' %}">Ver artículos publicados</a>
         {% if user.is_authenticated %}
+            {% if user.pk == publicacion.vendedor_id %}
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <a class="btn btn-outline-primary" href="{% url 'productos:editar' publicacion.pk %}">Editar publicación</a>
+                    <a class="btn btn-outline-danger" href="{% url 'productos:retirar' publicacion.pk %}">Retirar publicación</a>
+                </div>
+            {% endif %}
             <a class="btn btn-primary w-100 mt-3" href="{% url 'productos:publicar' %}">Publicar otro artículo</a>
         {% endif %}
     </div>

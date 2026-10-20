@@ -1,0 +1,39 @@
+{% extends "cuentas_app/base.html" %}
+
+{% block titulo %}Mis publicaciones{% endblock %}
+
+{% block contenido %}
+<h1 class="h3 mb-3">Mis publicaciones</h1>
+<p class="text-body-secondary">Administra los artículos asociados a tu cuenta.</p>
+<a class="btn btn-primary mb-4" href="{% url 'productos:publicar' %}">Publicar artículo</a>
+{% for publicacion in publicaciones %}
+    <article class="card border-0 shadow-sm mb-3">
+        <div class="card-body p-4">
+            <h2 class="h5">{{ publicacion.producto.nombre }}</h2>
+            <p class="small text-body-secondary">{{ publicacion.producto.categoria }}</p>
+            <p>{{ publicacion.producto.descripcion|linebreaksbr }}</p>
+            <dl class="row mb-2">
+                <dt class="col-sm-6">Precio</dt><dd class="col-sm-6">{{ publicacion.precio }}</dd>
+                <dt class="col-sm-6">Unidades disponibles</dt><dd class="col-sm-6">{{ publicacion.stock_disponible }}</dd>
+                <dt class="col-sm-6">Estado</dt>
+                <dd class="col-sm-6">
+                    {% if publicacion.estado == "retirada" %}Retirada (eliminación lógica)
+                    {% elif publicacion.stock_disponible == 0 %}Sin existencias
+                    {% else %}Activa{% endif %}
+                </dd>
+            </dl>
+            {% if publicacion.estado == "activa" %}
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-outline-primary" href="{% url 'productos:editar' publicacion.pk %}">Editar</a>
+                    <a class="btn btn-outline-danger" href="{% url 'productos:retirar' publicacion.pk %}">Retirar</a>
+                    {% if publicacion.stock_disponible > 0 %}
+                        <a class="btn btn-outline-secondary" href="{% url 'productos:detalle' publicacion.pk %}">Ver artículo</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </article>
+{% empty %}
+    <p>Aún no tienes publicaciones.</p>
+{% endfor %}
+{% endblock %}

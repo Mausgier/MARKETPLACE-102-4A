@@ -1,4 +1,4 @@
-"""Formulario de alta que reúne datos de Producto y Publicacion."""
+"""Formularios públicos de alta y edición de productos y publicaciones."""
 
 from decimal import Decimal
 
@@ -42,3 +42,24 @@ class PublicacionForm(forms.Form):
                 "form-select" if isinstance(campo.widget, forms.Select)
                 else "form-control"
             )
+
+
+class EdicionPublicacionForm(PublicacionForm):
+    """Reutiliza las validaciones del alta, permitiendo disponibilidad cero en RF-05."""
+
+    stock_disponible = forms.IntegerField(
+        label="Cantidad disponible", min_value=0, max_value=2147483647,
+        help_text=("Ingresa un número entero igual o superior a cero. "
+                   "Este cambio no modifica las unidades reservadas."),
+    )
+
+    def __init__(self, *args, publicacion, **kwargs):
+        """Carga exclusivamente los campos editables de la publicación propia."""
+        super().__init__(*args, **kwargs)
+        self.initial.update({
+            "nombre": publicacion.producto.nombre,
+            "descripcion": publicacion.producto.descripcion,
+            "categoria": publicacion.producto.categoria_id,
+            "precio": publicacion.precio,
+            "stock_disponible": publicacion.stock_disponible,
+        })
