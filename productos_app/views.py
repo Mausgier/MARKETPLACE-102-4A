@@ -1,10 +1,11 @@
-"""Consulta pública mínima y administración autenticada de publicaciones propias."""
+"""Catálogo público paginado y administración autenticada de publicaciones propias."""
 
 import logging
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 from django.db import DatabaseError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import never_cache
@@ -21,12 +22,15 @@ logger = logging.getLogger(__name__)
 
 
 def publicaciones_disponibles():
-    """Obtiene ofertas activas con unidades disponibles y sus relaciones descriptivas."""
+    """Comparte entre catálogo y detalle la condición de disponibilidad pública."""
+    # Las retiradas y las activas sin existencias quedan fuera de ambas consultas.
     # select_related evita consultas adicionales por cada tarjeta o detalle.
     # https://docs.djangoproject.com/en/5.2/ref/models/querysets/#select-related
     return Publicacion.objects.filter(
         estado=Publicacion.Estado.ACTIVA, stock_disponible__gt=0,
-    ).select_related("producto__categoria", "vendedor")
+    ).select_related("producto__categoria", "vendedor").order_by(
+        "-fecha_creacion", "-pk",
+    )
 
 
 @never_cache
@@ -74,10 +78,22 @@ def publicar_producto(request):
 
 @require_safe
 def publicaciones_recientes(request):
-    """Muestra hasta veinte ofertas recientes; el catálogo completo queda para RF-06."""
+    """
+    Permite recorrer todas las ofertas disponibles en páginas de doce artículos.
+
+    Conserva el nombre previo para mantener compatibles las rutas de RF-04 y RF-05.
+    https://docs.djangoproject.com/en/5.2/topics/pagination/#using-paginator-in-a-view-function
+    https://docs.djangoproject.com/en/5.2/ref/paginator/#django.core.paginator.Paginator.get_page
+    """
+    # El desempate por pk da un orden definido incluso con fechas coincidentes.
+    # Se pagina el QuerySet completo: no existe un límite global de veinte ofertas.
+    paginador = Paginator(publicaciones_disponibles(), 12)
+    # get_page resuelve texto o ausencia como primera página, y fuera de rango
+    # como última página; también admite un catálogo vacío sin lanzar una excepción.
+    pagina = paginador.get_page(request.GET.get("page"))
     return render(
         request, "productos_app/recientes.html",
-        {"publicaciones": publicaciones_disponibles()[:20]},
+        {"publicaciones": pagina, "pagina": pagina},
     )
 
 
