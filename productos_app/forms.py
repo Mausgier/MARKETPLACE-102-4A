@@ -1,4 +1,4 @@
-"""Formularios públicos de búsqueda, alta y edición de productos y publicaciones."""
+"""Formularios públicos del catálogo, alta y edición de productos y publicaciones."""
 
 from decimal import Decimal
 
@@ -24,6 +24,54 @@ class BusquedaProductosForm(forms.Form):
             "type": "search", "class": "form-control",
         }),
     )
+
+
+class CatalogoProductosForm(BusquedaProductosForm):
+    """
+    Integra búsqueda y filtros opcionales sin modificar las entidades comerciales.
+
+    https://docs.djangoproject.com/en/5.2/ref/forms/fields/#modelchoicefield
+    https://docs.djangoproject.com/en/5.2/ref/forms/fields/#decimalfield
+    """
+
+    categoria = forms.ModelChoiceField(
+        label="Categoría", queryset=Categoria.objects.all(), required=False,
+        empty_label="Todas las categorías",
+        error_messages={"invalid_choice": "Selecciona una categoría existente."},
+    )
+    precio_minimo = forms.DecimalField(
+        label="Precio mínimo", required=False, min_value=Decimal("0"),
+        max_digits=12, decimal_places=2,
+        help_text="Opcional. Desde este importe, incluido; hasta dos decimales.",
+    )
+    precio_maximo = forms.DecimalField(
+        label="Precio máximo", required=False, min_value=Decimal("0"),
+        max_digits=12, decimal_places=2,
+        help_text="Opcional. Hasta este importe, incluido; hasta dos decimales.",
+    )
+
+    def __init__(self, *args, **kwargs):
+        """Conserva la presentación de búsqueda y aplica Bootstrap a los filtros."""
+        super().__init__(*args, **kwargs)
+        for nombre in ("categoria", "precio_minimo", "precio_maximo"):
+            self.fields[nombre].widget.attrs["class"] = (
+                "form-select" if nombre == "categoria" else "form-control"
+            )
+
+    def clean(self):
+        """
+        Valida el rango completo sin impedir límites individuales o iguales.
+
+        https://docs.djangoproject.com/en/5.2/ref/forms/validation/#cleaning-and-validating-fields-that-depend-on-each-other
+        """
+        datos = super().clean()
+        minimo = datos.get("precio_minimo")
+        maximo = datos.get("precio_maximo")
+        if minimo is not None and maximo is not None and minimo > maximo:
+            raise forms.ValidationError(
+                "El precio mínimo no puede ser mayor que el precio máximo."
+            )
+        return datos
 
 
 class PublicacionForm(forms.Form):

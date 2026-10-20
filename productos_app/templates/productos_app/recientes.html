@@ -10,7 +10,7 @@
     {% endif %}
 </div>
 <p class="text-body-secondary">Explora los artículos disponibles, desde los más recientes.</p>
-{# El formulario omite page y usa la ruta base: una búsqueda nueva empieza en uno. #}
+{# Omitir page reinicia la navegación al aplicar una búsqueda o filtros nuevos. #}
 <form method="get" action="{% url 'productos:recientes' %}" role="search" class="mb-4" novalidate>
     <div class="mb-2">
         {{ formulario_busqueda.q.label_tag }}
@@ -20,13 +20,40 @@
             <div class="text-danger small mt-1" id="{{ formulario_busqueda.q.auto_id }}_error" role="alert">{{ formulario_busqueda.q.errors }}</div>
         {% endif %}
     </div>
+    <fieldset class="border rounded p-3 my-3">
+        <legend class="float-none w-auto px-2 fs-6">Filtrar productos</legend>
+        <div class="row g-3">
+            {% for campo in formulario_busqueda %}
+                {% if campo.name != "q" %}
+                    <div class="{% if campo.name == 'categoria' %}col-12{% else %}col-12 col-sm-6{% endif %}">
+                        {{ campo.label_tag }}
+                        {{ campo }}
+                        {% if campo.help_text %}
+                            <div class="form-text" id="{{ campo.auto_id }}_helptext">{{ campo.help_text }}</div>
+                        {% endif %}
+                        {% if campo.errors %}
+                            <div class="text-danger small mt-1" id="{{ campo.auto_id }}_error" role="alert">{{ campo.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </fieldset>
+    {% if formulario_busqueda.non_field_errors %}
+        <div class="alert alert-danger" role="alert">{{ formulario_busqueda.non_field_errors }}</div>
+    {% endif %}
     <div class="d-flex flex-wrap gap-2">
-        <button class="btn btn-primary" type="submit">Buscar</button>
-        <a class="btn btn-outline-secondary" href="{% url 'productos:recientes' %}">Limpiar búsqueda</a>
+        <button class="btn btn-primary" type="submit">Buscar y aplicar filtros</button>
+        <a class="btn btn-outline-secondary" href="{% url 'productos:recientes' %}{% querystring sin_filtros %}">Limpiar filtros</a>
+        <a class="btn btn-outline-secondary" href="{% url 'productos:recientes' %}{% querystring sin_busqueda %}">Limpiar búsqueda</a>
+        <a class="btn btn-outline-secondary" href="{% url 'productos:recientes' %}">Ver todo</a>
     </div>
 </form>
 {% if termino %}
     <p>Resultados para: <strong>{{ termino }}</strong></p>
+{% endif %}
+{% if filtros_activos and not formulario_busqueda.errors %}
+    <p class="small text-body-secondary">Filtros de categoría o precio aplicados. Los resultados cumplen todos los criterios seleccionados.</p>
 {% endif %}
 {% if pagina.paginator.count %}
     <p class="small text-body-secondary">
@@ -48,27 +75,30 @@
 {% empty %}
     {% if not formulario_busqueda.errors %}
         <div class="alert alert-info" role="status">
-            {% if termino %}No se encontraron resultados para esta búsqueda.
+            {% if termino and filtros_activos %}No se encontraron coincidencias para esta búsqueda con los filtros seleccionados.
+            {% elif filtros_activos %}No hay publicaciones que cumplan los filtros seleccionados.
+            {% elif termino %}No se encontraron resultados para esta búsqueda.
             {% else %}Todavía no hay publicaciones disponibles.{% endif %}
         </div>
     {% endif %}
 {% endfor %}
 {% if pagina.has_other_pages %}
-    {# Solo se conserva el término validado, codificado para URL y con escape HTML. #}
+    {# querystring conserva los criterios y sustituye solo page; aplica codificación URL. #}
+    {# https://docs.djangoproject.com/en/5.2/ref/templates/builtins/#querystring #}
     <nav class="mt-4" aria-label="Páginas del catálogo">
         <p class="small text-center">Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</p>
         <ul class="pagination pagination-sm justify-content-center flex-wrap gap-1">
             {% if pagina.has_previous %}
-                <li class="page-item"><a class="page-link" href="?page=1{% if termino %}&amp;q={{ termino|urlencode }}{% endif %}">Primera</a></li>
-                <li class="page-item"><a class="page-link" rel="prev" href="?page={{ pagina.previous_page_number }}{% if termino %}&amp;q={{ termino|urlencode }}{% endif %}">Anterior</a></li>
+                <li class="page-item"><a class="page-link" href="{% querystring parametros page=1 %}">Primera</a></li>
+                <li class="page-item"><a class="page-link" rel="prev" href="{% querystring parametros page=pagina.previous_page_number %}">Anterior</a></li>
             {% else %}
                 <li class="page-item disabled"><span class="page-link" aria-disabled="true">Primera</span></li>
                 <li class="page-item disabled"><span class="page-link" aria-disabled="true">Anterior</span></li>
             {% endif %}
             <li class="page-item active" aria-current="page"><span class="page-link">{{ pagina.number }}</span></li>
             {% if pagina.has_next %}
-                <li class="page-item"><a class="page-link" rel="next" href="?page={{ pagina.next_page_number }}{% if termino %}&amp;q={{ termino|urlencode }}{% endif %}">Siguiente</a></li>
-                <li class="page-item"><a class="page-link" href="?page={{ pagina.paginator.num_pages }}{% if termino %}&amp;q={{ termino|urlencode }}{% endif %}">Última</a></li>
+                <li class="page-item"><a class="page-link" rel="next" href="{% querystring parametros page=pagina.next_page_number %}">Siguiente</a></li>
+                <li class="page-item"><a class="page-link" href="{% querystring parametros page=pagina.paginator.num_pages %}">Última</a></li>
             {% else %}
                 <li class="page-item disabled"><span class="page-link" aria-disabled="true">Siguiente</span></li>
                 <li class="page-item disabled"><span class="page-link" aria-disabled="true">Última</span></li>

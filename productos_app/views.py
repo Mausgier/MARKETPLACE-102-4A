@@ -8,11 +8,12 @@ from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db import DatabaseError
 from django.db.models import Q
+from django.http import QueryDict
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_http_methods, require_safe
 
-from .forms import BusquedaProductosForm, EdicionPublicacionForm, PublicacionForm
+from .forms import CatalogoProductosForm, EdicionPublicacionForm, PublicacionForm
 from .models import Publicacion
 from .services import (
     crear_publicacion, editar_publicacion, obtener_publicacion_propia,
@@ -80,18 +81,39 @@ def publicar_producto(request):
 @require_safe
 def publicaciones_recientes(request):
     """
-    Busca y pagina las ofertas disponibles sin exigir una sesión autenticada.
+    Busca, filtra y pagina ofertas disponibles sin exigir una sesión autenticada.
 
     Conserva el nombre previo para mantener compatibles las rutas de RF-04 y RF-05.
     https://docs.djangoproject.com/en/5.2/topics/pagination/#using-paginator-in-a-view-function
     https://docs.djangoproject.com/en/5.2/ref/paginator/#django.core.paginator.Paginator.get_page
     https://docs.djangoproject.com/en/5.2/topics/db/queries/#complex-lookups-with-q-objects
     """
-    formulario_busqueda = BusquedaProductosForm(request.GET)
+    formulario_busqueda = CatalogoProductosForm(request.GET)
     publicaciones = publicaciones_disponibles()
-    termino = ""
-    if formulario_busqueda.is_valid():
-        termino = formulario_busqueda.cleaned_data["q"]
+    criterios_validos = formulario_busqueda.is_valid()
+    datos = formulario_busqueda.cleaned_data
+    termino = datos.get("q", "")
+    # Solo se conservan campos conocidos que superaron su validación individual.
+    # QueryDict y querystring codifican los valores sin concatenar entrada libre.
+    parametros = QueryDict(mutable=True)
+    if termino:
+        parametros["q"] = termino
+    categoria = datos.get("categoria")
+    if categoria is not None:
+        parametros["categoria"] = str(categoria.pk)
+    for campo in ("precio_minimo", "precio_maximo"):
+        if datos.get(campo) is not None:
+            parametros[campo] = str(datos[campo])
+    filtros_activos = any(campo in parametros for campo in (
+        "categoria", "precio_minimo", "precio_maximo",
+    ))
+    sin_busqueda = parametros.copy()
+    sin_busqueda.pop("q", None)
+    sin_filtros = QueryDict(mutable=True)
+    if termino:
+        sin_filtros["q"] = termino
+
+    if criterios_validos:
         if termino:
             # Se busca la frase completa en cualquiera de los dos campos mediante
             # parámetros del ORM. No se interpreta SQL ni se separan palabras.
@@ -101,11 +123,19 @@ def publicaciones_recientes(request):
                 Q(producto__nombre__icontains=termino)
                 | Q(producto__descripcion__icontains=termino)
             )
+        # Las condiciones sucesivas se combinan con AND sobre la misma consulta.
+        # Los límites inclusivos usan Decimal; cero también es un filtro válido.
+        if categoria is not None:
+            publicaciones = publicaciones.filter(producto__categoria=categoria)
+        if datos["precio_minimo"] is not None:
+            publicaciones = publicaciones.filter(precio__gte=datos["precio_minimo"])
+        if datos["precio_maximo"] is not None:
+            publicaciones = publicaciones.filter(precio__lte=datos["precio_maximo"])
     else:
-        # No ejecutar una búsqueda inválida ni presentarla como catálogo general.
+        # No mostrar resultados parciales ante una categoría o un rango inválidos.
         publicaciones = publicaciones.none()
     # El desempate por pk da un orden definido incluso con fechas coincidentes.
-    # La búsqueda se aplica antes de paginar: el conteo incluye solo coincidencias.
+    # Búsqueda y filtros preceden a la paginación y al conteo de coincidencias.
     paginador = Paginator(publicaciones, 12)
     # get_page resuelve texto o ausencia como primera página, y fuera de rango
     # como última página; también admite un catálogo vacío sin lanzar una excepción.
@@ -115,6 +145,8 @@ def publicaciones_recientes(request):
         {
             "publicaciones": pagina, "pagina": pagina,
             "formulario_busqueda": formulario_busqueda, "termino": termino,
+            "filtros_activos": filtros_activos, "parametros": parametros,
+            "sin_busqueda": sin_busqueda, "sin_filtros": sin_filtros,
         },
     )
 
